@@ -24,13 +24,13 @@ double* scan(double* data, int n, std::function<double(double, double)> op, doub
 	     MPI_Comm comm);
 
 // TODO
-// void gather(void* data, int n, MPI_Datatype dtype, int root, MPI_Comm comm);
+void gather(void* gathered_data, const int n, const void* local_data, const int n_local,
+	    MPI_Datatype dtype, int root, MPI_Comm comm);
 
 // TODO
-// void scatter(void* data, int n, MPI_Datatype dtype, int root, MPI_Comm comm);
+void scatter(void* scattered_data, const int n, void* local_data, const int n_local,
+	     MPI_Datatype dtype, int root, MPI_Comm comm);
 
 // TODO
-// void all_to_all();
-
-// TODO
-// void many_to_many();
+void all_to_all(void* send_data, int* send_counts, void* recv_data, int* recv_counts,
+		MPI_Datatype dtype, MPI_Comm comm);

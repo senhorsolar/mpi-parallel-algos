@@ -7,4 +7,3 @@ Primitives include:
 * Gather (all gather)
 * Scatter
 * All-to-all
-* Many-to-many
