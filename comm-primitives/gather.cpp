@@ -9,11 +9,10 @@ void gather(void* gathered_data, const int n, const void* local_data, const int 
     MPI_Comm_size(comm, &size);
     MPI_Comm_rank(comm, &rank);
 
-
-    if (rank != root) {
+    if (rank != root) { // Send data to root
 	MPI_Send(local_data, n_local, dtype, root, 111, comm);
     }
-    else {
+    else { // Root receives data from each processor
 
 	// Determine dtype's byte size
 	int dtype_size;
@@ -26,7 +25,8 @@ void gather(void* gathered_data, const int n, const void* local_data, const int 
 
 	    // Size of local data for i_rank
 	    int i_rank_n = local_size(n, size, i_rank);
-	    
+
+	    // Root already has its data
 	    if (i_rank == root) {		
 		memcpy(gathered_data, local_data, n_local * dtype_size);
 	    }
@@ -34,7 +34,7 @@ void gather(void* gathered_data, const int n, const void* local_data, const int 
 		MPI_Recv(gathered_data, i_rank_n, dtype, i_rank, 111, comm, MPI_STATUS_IGNORE);
 	    }
 
-	    gathered_data += i_rank_n;
+	    gathered_data += (i_rank_n * dtype_size);
 	}
     }
 }

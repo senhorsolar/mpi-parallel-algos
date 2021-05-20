@@ -1,6 +1,5 @@
 #include "comm_primitives.h"
 #include "utils.h"
-#include <cstring>
 
 
 void all_to_all(void* send_data, int* send_counts, void* recv_data, int* recv_counts,
@@ -13,12 +12,15 @@ void all_to_all(void* send_data, int* send_counts, void* recv_data, int* recv_co
     send_data = std::static_cast<char*>(send_data);
     recv_data = std::static_cast<char*>(recv_data);
 
+    // Determine byte size of this mpi dtype
     int dtype_size;
     MPI_Type_size(dtype, &dtype_size);
 
     int* send_disps = new int[size];
     int* recv_disps = new int[size];
 
+    // Determine where in memory the data being sent to rank i is at in
+    // send/recv data. Assumes data is contiguous in the order of the given rank.
     int send_offset = 0;
     int recv_offset = 0;
     for (int i = 0; i < size; i++) {
@@ -30,6 +32,7 @@ void all_to_all(void* send_data, int* send_counts, void* recv_data, int* recv_co
     }
 
     for (int j = 1; j < size; j++) {
+	// For minimal communication blocking
 	int pair_rank = (rank + j) % size;
 	
     	int send_idx = send_disps[pair_rank];

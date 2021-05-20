@@ -39,9 +39,11 @@ void sample_sort(const int* local_data, const int n, int** local_sorted, &int n_
     MPI_Comm_size(comm, &size);
     MPI_Comm_rank(comm, &rank);
 
+    // Local sort
     int n_local = local_size(n, size, rank);
     std::sort(local_data, local_data + n_local);
 
+    // Find local splitters
     int n_local_splitters = std::min(n_local, size-1);
     int* local_splitters = new int[n_local_splitters];
 
@@ -53,11 +55,14 @@ void sample_sort(const int* local_data, const int n, int** local_sorted, &int n_
 	offset += step;
     }
 
+    // Determine total number of local splitters across each processor
     int total_local_splitters;
-
     MPI_Allreduce(&n_local_splitters, &total_local_splitters, MPI_INT, MPI_SUM, comm);
+
+    // Sort local splitters
     bitonic_sort(local_splitters, total_local_splitters, comm);
 
+    // Obtain global splitters, which is the last local splitter on each processor
     int* global_splitters = new int[size];
     
     int* recv_counts = new int[size];
@@ -67,13 +72,17 @@ void sample_sort(const int* local_data, const int n, int** local_sorted, &int n_
 	recv_counts[i] = 1;
 	recv_displs[i] = i;
     }
-    
+
+    // After this all-gather, each processor has the global splitters
     MPI_Allgatherv(&local_splitters[n_local_splitters-1], 1, MPI_INT, global_splitters,
 		   recv_counts, recv_displs, MPI_INT, comm);
 
-    // Now each processor as the global splitters
+    // Force the last element of the global splitters to be the largest element
+    // in the local array. This is to avoid some data not being sent to the last
+    // processor.
+    global_splitter[size-1] = local_data[n_local-1];
 
-    // Send fragments of local data to each other processor dependent on global splitter
+    // Send fragments of local data to each other processor dependent on global splitter.
     // Determine how many will be sent to each rank
     int* send_counts = new int[size];
     for (int i = 0; i < size; i++) {
@@ -84,12 +93,13 @@ void sample_sort(const int* local_data, const int n, int** local_sorted, &int n_
 	send_counts[i] = count;
     }
 
-    // Determine how many will be received
+    // Determine how many elements will be sent/received to/from each processor
     int* ones = new int[size];
     std::fill(ones, ones + size, 1);
-    
     all_to_all(send_counts, ones, recv_counts, ones, MPI_INT, comm);
 
+    // Send/receive elements from each processor, according to how they are
+    // fragmented by the global splitters.
     n_sort = 0;
     for (int i = 0; i < size; i++)
 	n_sort += recv_counts[i];
@@ -98,6 +108,7 @@ void sample_sort(const int* local_data, const int n, int** local_sorted, &int n_
     
     all_to_all(local_data, send_counts, p_sorted_arrays, recv_counts);
 
+    // Merge the p sorted arrays
     *local_sorted = new int[n_sort];
 
     int* disps = recv_disps;

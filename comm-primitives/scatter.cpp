@@ -10,10 +10,10 @@ void scatter(void* scattered_data, const int n, void* local_data, const int n_lo
     MPI_Comm_size(comm, &size);
     MPI_Comm_rank(comm, &rank);
 
-    if (rank != root) {
+    if (rank != root) { // Receive data from root
 	MPI_Recv(local_data, n_local, dtype, root, 111, comm, MPI_STATUS_IGNORE);
     }
-    else {
+    else { // Root sends data to each processor
 	int dtype_size;
 	MPI_Type_size(dtype, &dtype_size);
 
@@ -23,14 +23,15 @@ void scatter(void* scattered_data, const int n, void* local_data, const int n_lo
 
 	    int i_rank_n = local_size(n, size, i_rank);
 
+	    // Root already has its data
 	    if (i_rank == root) {
 		memcpy(local_data, scattered_data, n_local * dtype_size);
 	    }
-	    else {
+	    else { // Send portion of data
 		MPI_Send(scattered_data, i_rank_n, dtype, root, 111, comm);
 	    }
 
-	    scattered_data += i_rank_n;
+	    scattered_data += (i_rank_n * dtype_size);
 	}
     }
 }
