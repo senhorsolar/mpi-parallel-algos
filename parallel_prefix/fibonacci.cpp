@@ -34,7 +34,8 @@ unsigned long long fibonacci(unsigned int n, MPI_Comm comm)
     ulong result = mat[0];
     
     MPI_Op_free(&op);
-
+    delete mat;
+	
     return result;
 }
 
