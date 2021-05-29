@@ -3,7 +3,7 @@
 #include <cstring>
 
 
-void gather(void* gathered_data, const int n, const void* local_data, const int n_local, MPI_Datatype dtype, int root, MPI_Comm comm)
+void gather(void* vgathered_data, const int n, const void* local_data, const int n_local, MPI_Datatype dtype, int root, MPI_Comm comm)
 {
     int size, rank;
     MPI_Comm_size(comm, &size);
@@ -19,7 +19,7 @@ void gather(void* gathered_data, const int n, const void* local_data, const int 
 	MPI_Type_size(dtype, &dtype_size);
 
 	// Cast to char* so that we can do pointer arithmetic
-	gathered_data = std::static_cast<char*>(gathered_data);
+	char* gathered_data = (char*)vgathered_data;
 	
 	for (int i_rank = 0; i_rank < size; i_rank++) {
 

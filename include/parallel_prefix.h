@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PARALLEL_PREFIX_H
+#define PARALLEL_PREFIX_H
 
 #include <mpi.h>
 
@@ -14,7 +15,7 @@
  * @param dtype       MPI datatype
  * @param comm        MPI communicator
  */
-void* prefix_sum(void* local_data, const int n, MPI_Datatype dtype, MPI_Comm comm);
+void prefix_sum(void* local_data, const int n, MPI_Datatype dtype, MPI_Comm comm);
 
 
 /**
@@ -45,3 +46,5 @@ double polynomial_eval(const double* coefficients, const double x, const int n_l
  * @param comm  MPI communicator
  */
 unsigned long long fibonacci(unsigned int n, MPI_Comm comm);
+
+#endif

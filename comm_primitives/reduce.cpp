@@ -21,7 +21,7 @@ double reduce(double* data, int n_local, std::function<double(double, double)> o
     for (int j = 0; j < d; j++) {
 	int pair_rank = rank ^ (1 << j);
 
-	if (pair_rank < p) {
+	if (pair_rank < size) {
 	    double recv_result;
 
 	    MPI_Send(&result, 1, MPI_DOUBLE, pair_rank, 111, comm);

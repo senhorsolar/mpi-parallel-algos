@@ -11,6 +11,7 @@ void merge_p(int* p_sorted_arrs, int p, int* sizes, int* displs, int* output)
 	for (int i = 0; i < n; i++) {
 	    output[i] = p_sorted_arrs[i];
 	}
+	return;
     }
 
     int l = p / 2;
@@ -27,12 +28,12 @@ void merge_p(int* p_sorted_arrs, int p, int* sizes, int* displs, int* output)
 
     merge(output, out1, left_size, out2, right_size);
 
-    delete out1;
-    delete out2;
+    delete[] out1;
+    delete[] out2;
 }
 
 
-void sample_sort(const int* local_data, const int n, int** local_sorted, &int n_sort,
+void sample_sort(int* local_data, const int n, int** local_sorted, int& n_sort,
 		 MPI_Comm comm)
 {
     int size, rank;
@@ -57,7 +58,7 @@ void sample_sort(const int* local_data, const int n, int** local_sorted, &int n_
 
     // Determine total number of local splitters across each processor
     int total_local_splitters;
-    MPI_Allreduce(&n_local_splitters, &total_local_splitters, MPI_INT, MPI_SUM, comm);
+    MPI_Allreduce(&n_local_splitters, &total_local_splitters, 1, MPI_INT, MPI_SUM, comm);
 
     // Sort local splitters
     bitonic_sort(local_splitters, total_local_splitters, comm);
@@ -80,14 +81,14 @@ void sample_sort(const int* local_data, const int n, int** local_sorted, &int n_
     // Force the last element of the global splitters to be the largest element
     // in the local array. This is to avoid some data not being sent to the last
     // processor.
-    global_splitter[size-1] = local_data[n_local-1];
+    global_splitters[size-1] = local_data[n_local-1];
 
     // Send fragments of local data to each other processor dependent on global splitter.
     // Determine how many will be sent to each rank
     int* send_counts = new int[size];
     for (int i = 0; i < size; i++) {
 	int count = 0;
-	while (offset < n_local and local_data[offset] <= global_splitter[i]) {
+	while (offset < n_local and local_data[offset] <= global_splitters[i]) {
 	    count += 1;
 	}
 	send_counts[i] = count;
@@ -106,24 +107,24 @@ void sample_sort(const int* local_data, const int n, int** local_sorted, &int n_
 
     int* p_sorted_arrays = new int[n_sort];
     
-    all_to_all(local_data, send_counts, p_sorted_arrays, recv_counts);
+    all_to_all(local_data, send_counts, p_sorted_arrays, recv_counts, MPI_INT, comm);
 
     // Merge the p sorted arrays
     *local_sorted = new int[n_sort];
 
-    int* disps = recv_disps;
-    int offset = 0;
+    int* disps = recv_displs;
+    offset = 0;
     for (int i = 0; i < size; i++) {
 	disps[i] = offset;
 	offset += recv_counts[i];
     }
-    merge_p(p_sorted_arrays, size, disps, *local_sorted);
+    merge_p(p_sorted_arrays, size, recv_counts, disps, *local_sorted);
 
-    delete p_sorted_arrays;
-    delete ones;
-    delete recv_counts;
-    delete send_counts;
-    delete recv_displs;
-    delete local_splitters;
-    delete global_splitters;
+    delete[] p_sorted_arrays;
+    delete[] ones;
+    delete[] recv_counts;
+    delete[] send_counts;
+    delete[] recv_displs;
+    delete[] local_splitters;
+    delete[] global_splitters;
 }

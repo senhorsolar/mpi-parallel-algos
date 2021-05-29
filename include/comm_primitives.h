@@ -1,4 +1,6 @@
-#pragma once
+#ifndef COMM_PRIMITIVES_H
+#define COMM_PRIMITIVES_H
+
 
 #include <functional>
 #include <mpi.h>
@@ -98,3 +100,5 @@ void scatter(void* scattered_data, const int n, void* local_data, const int n_lo
  */
 void all_to_all(void* send_data, int* send_counts, void* recv_data, int* recv_counts,
 		MPI_Datatype dtype, MPI_Comm comm);
+
+#endif

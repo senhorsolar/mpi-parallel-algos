@@ -3,7 +3,7 @@
 #include <cstring>
 
 
-void scatter(void* scattered_data, const int n, void* local_data, const int n_local,
+void scatter(void* vscattered_data, const int n, void* local_data, const int n_local,
 	     MPI_Datatype dtype, int root, MPI_Comm comm)
 {
     int size, rank;
@@ -17,7 +17,7 @@ void scatter(void* scattered_data, const int n, void* local_data, const int n_lo
 	int dtype_size;
 	MPI_Type_size(dtype, &dtype_size);
 
-	scattered_data = std::static_cast<char*>(scattered_data);
+	char* scattered_data = (char*)vscattered_data;
 
 	for (int i_rank = 0; i_rank < size; i_rank++) {
 

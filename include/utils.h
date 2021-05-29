@@ -1,4 +1,5 @@
-#pragma once
+#ifndef UTILS_H
+#define UTILS_H
 
 
 inline bool ispow2(int x)
@@ -11,7 +12,7 @@ inline bool ispow2(int x)
     }
 }
 
-int log2_floor(int p)
+inline int log2_floor(int p)
 {
 
     if (p <= 0)
@@ -25,7 +26,7 @@ int log2_floor(int p)
     return d;
 }
 
-int log2_ceil(int p)
+inline int log2_ceil(int p)
 {
     if (ispow2(p)) {
 	return log2_floor(p);
@@ -37,5 +38,7 @@ int log2_ceil(int p)
 
 inline int local_size(int n, int size, int rank)
 {
-    return n / p + (rank < n % p);
+    return n / size + (rank < n % size);
 }
+
+#endif

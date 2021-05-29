@@ -2,15 +2,15 @@
 #include "utils.h"
 
 
-void all_to_all(void* send_data, int* send_counts, void* recv_data, int* recv_counts,
+void all_to_all(void* vsend_data, int* send_counts, void* vrecv_data, int* recv_counts,
 		MPI_Datatype dtype, MPI_Comm comm)
 {
     int size, rank;
     MPI_Comm_size(comm, &size);
     MPI_Comm_rank(comm, &rank);
 
-    send_data = std::static_cast<char*>(send_data);
-    recv_data = std::static_cast<char*>(recv_data);
+    char* send_data = (char*)vsend_data;
+    char* recv_data = (char*)vrecv_data;
 
     // Determine byte size of this mpi dtype
     int dtype_size;
@@ -46,6 +46,6 @@ void all_to_all(void* send_data, int* send_counts, void* recv_data, int* recv_co
 		     MPI_STATUS_IGNORE);
     }
 
-    delete send_disps;
-    delete recv_disps;
+    delete[] send_disps;
+    delete[] recv_disps;
 }

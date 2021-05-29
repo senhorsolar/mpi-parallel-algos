@@ -16,11 +16,11 @@ double* scan(double* data, int n_local, std::function<double(double, double)> op
     double* local_result = new double[n_local];
     local_result[0] = data[0];
     for (int i = 1; i < n_local; i++)
-	local_results[i] = op(local_results[i-1], data[i]);
+	local_result[i] = op(local_result[i-1], data[i]);
 
     int d = log2_ceil(size);
     double prefix_sum = id;
-    double total_sum = local_results[n_local-1];
+    double total_sum = local_result[n_local-1];
 
     // Distributed scan
     for (int j = 0; j < d; j++) {
@@ -40,7 +40,7 @@ double* scan(double* data, int n_local, std::function<double(double, double)> op
     }
 
     for (int i = 0; i < n_local; i++)
-	local_results[i] = op(prefix_sum, local_results[i]);
+	local_result[i] = op(prefix_sum, local_result[i]);
     
-    return local_results;
+    return local_result;
 }

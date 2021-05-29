@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SORTING_H
+#define SORTING_H
 
 #include <mpi.h>
 
@@ -27,7 +28,7 @@ void bitonic_sort(int* local_data, int n, MPI_Comm comm);
  * @param n_sort        Number of elements in output array (determined at runtime)
  * @param comm          MPI communicator
  */
-void sample_sort(const int* local_data, const int n, int** local_sorted, &int n_sort,
+void sample_sort(int* local_data, const int n, int** local_sorted, int& n_sort,
 		 MPI_Comm comm);
 
 
@@ -40,7 +41,7 @@ void sample_sort(const int* local_data, const int n, int** local_sorted, &int n_
  * @param arr2          Array 2 of 2
  * @param n2            Size of array 2
  */
-void merge(int* merge_buffer, int* arr1, int n1, int* arr2, int n2)
+inline void merge(int* merge_buffer, int* arr1, int n1, int* arr2, int n2)
 {
 
     int i = 0;
@@ -59,3 +60,5 @@ void merge(int* merge_buffer, int* arr1, int n1, int* arr2, int n2)
 	k++;
     }
 }
+
+#endif

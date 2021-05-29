@@ -13,7 +13,7 @@ void bitonic_sort(int* local_data, int n, MPI_Comm comm)
     int n_local = local_size(n, size, rank);
     std::sort(local_data, local_data + n_local);
 
-    int n_max = n / p + (n % p > 0);
+    int n_max = n / size + (n % size > 0);
     int* recv_buffer = new int[n_max];
     int* merge_buffer = new int[n_max * 2];
  
@@ -40,19 +40,19 @@ void bitonic_sort(int* local_data, int n, MPI_Comm comm)
 		    if (rank > pair_rank)
 			memcpy(local_data, merge_buffer, n_local * sizeof(int));
 		    else
-			mempcy(local_data, merge_buffer + n_pair, n_local * sizeof(int));
+			memcpy(local_data, merge_buffer + n_pair, n_local * sizeof(int));
 		}
 		else {
 		    // Smaller rank gets smaller elements
 		    if (rank < pair_rank)
 			memcpy(local_data, merge_buffer, n_local * sizeof(int));
 		    else
-			mempcy(local_data, merge_buffer + n_pair, n_local * sizeof(int));
+			memcpy(local_data, merge_buffer + n_pair, n_local * sizeof(int));
 		}
 	    }
 	}
     }
 
-    delete recv_buffer;
-    delete merge_buffer;
+    delete[] recv_buffer;
+    delete[] merge_buffer;
 }

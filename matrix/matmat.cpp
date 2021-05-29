@@ -1,4 +1,5 @@
 #include "matrix.h"
+#include "utils.h"
 #include <cmath>
 
 
@@ -30,17 +31,17 @@ void matmatprod(double* local_A, double* local_B, double* local_C, int n, MPI_Co
 			 shiftsource, 1, grid_comm, MPI_STATUS_IGNORE);
 
     // Initial B alignment
-    MPI_Cart_shift(grid_comm, 1, -coords[1], &shiftshorce, &shiftdest);
+    MPI_Cart_shift(grid_comm, 1, -coords[1], &shiftsource, &shiftdest);
     MPI_Sendrecv_replace(local_B, nlocal*nlocal, MPI_DOUBLE, shiftdest, 1,
 			 shiftsource, 1, grid_comm, MPI_STATUS_IGNORE);
 
-    for (int it = 0; i < q; it++) {
+    for (int it = 0; it < q; it++) {
 	
 	// Local mat-mat prod
 	for (int i = 0; i < nlocal; i++) {
 	    for (int j = 0; j < nlocal; j++) {
 		for (int k = 0; k < nlocal; k++) {
-		    local_C = += local_A[i*nlocal + k] * local_B[k*nlocal * j];
+		    local_C[i*nlocal + k] += local_A[i*nlocal + k] * local_B[k*nlocal * j];
 		}
 	    }
 	}

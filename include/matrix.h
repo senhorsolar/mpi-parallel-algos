@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MATRIX_H
+#define MATRIX_H
 
 #include <mpi.h>
 
@@ -36,4 +37,6 @@ void matvecprod(double* local_A, int n, double* local_x, double* local_y,
  * @param n          Dimension of A, where A is an n-by-n matrix
  * @param grid_comm  MPI communicator on a 2D grid
  */
-void matmatprod(double* local_A, double* local_B, double* local_C, int n, MPI_Comm grid_comm)
+void matmatprod(double* local_A, double* local_B, double* local_C, int n, MPI_Comm grid_comm);
+
+#endif

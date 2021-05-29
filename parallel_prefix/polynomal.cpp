@@ -26,7 +26,7 @@ double polynomial_eval(const double* coefficients, const double x, const int n_l
     double result;
     MPI_Allreduce(&inner_sum, &result, 1, MPI_DOUBLE, MPI_SUM, comm);
 
-    delete xs;
+    delete[] xs;
     
     return result;
 }

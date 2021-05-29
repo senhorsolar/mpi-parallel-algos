@@ -1,5 +1,7 @@
 #include "matrix.h"
+#include "utils.h"
 #include <cmath>
+#include <cstring>
 
 
 void matvecprod(double* local_A, int n, double* local_x, double* local_y,
@@ -28,7 +30,7 @@ void matvecprod(double* local_A, int n, double* local_x, double* local_y,
 	if (coords[0] != 0) {
 	    int diag_coords[] = {coords[0], coords[0]};
 	    int diag_rank;
-	    MPI_Card_rank(grid_comm, diag_coords, &diag_rank);
+	    MPI_Cart_rank(grid_comm, diag_coords, &diag_rank);
 
 	    MPI_Send(local_x, nrow, MPI_DOUBLE, diag_rank, 111, grid_comm);
 	}
@@ -41,9 +43,9 @@ void matvecprod(double* local_A, int n, double* local_x, double* local_y,
 	    memcpy(local_x_T, local_x, nrow * sizeof(double));
 	}
 	else {
-	    int col_coords[0] = {coords[0], 0};
+	    int col_coords[] = {coords[0], 0};
 	    int col_rank;
-	    MPI_Cart_rank(comm, col_coords, &col_rank);
+	    MPI_Cart_rank(grid_comm, col_coords, &col_rank);
 
 	    MPI_Recv(local_x_T, ncol, MPI_DOUBLE, col_rank, 111, grid_comm,
 		     MPI_STATUS_IGNORE);
@@ -69,11 +71,11 @@ void matvecprod(double* local_A, int n, double* local_x, double* local_y,
 
     // Summation reduce across row
     MPI_Comm row_comm;
-    MPI_Comm_split(grid_comm, coords[0], coords[1], row_comm);
-    MPI_Reduce(local_result, local_y, nrow, MPI_DOUBLE, 0, row_comm);
+    MPI_Comm_split(grid_comm, coords[0], coords[1], &row_comm);
+    MPI_Reduce(local_result, local_y, nrow, MPI_DOUBLE, MPI_SUM, 0, row_comm);
     
     MPI_Comm_free(&column_comm);
     MPI_Comm_free(&row_comm);
-    delete local_x_T;
-    delete local_result;
+    delete[] local_x_T;
+    delete[] local_result;
 }
